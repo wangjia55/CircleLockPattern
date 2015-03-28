@@ -1,6 +1,7 @@
 package com.jacob.circle.lock;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -27,7 +28,7 @@ public class LockPatternView extends View {
     private Bitmap mBitmapError;
 
     //12个点组成一个圆形
-    public static final int COUNT = 12;
+    public static int COUNT = 12;
 
     public static final int MIN_SIZE = 5;
 
@@ -54,21 +55,24 @@ public class LockPatternView extends View {
     //用于绘制触摸过程中的线
     private Paint mPathPaint = new Paint();
 
-    private static final int COLOR_NORMAL = Color.parseColor("#7fb400");
+    private static final int COLOR_NORMAL = Color.parseColor("#7fff9e00");
     private static final int COLOR_ERROR = Color.parseColor("#7ffb6760");
 
     public LockPatternView(Context context) {
-        super(context);
-        initView();
+        this(context, null);
     }
 
     public LockPatternView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initView();
+        this(context, attrs, 0);
     }
 
     public LockPatternView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.LockPatternView);
+        RADIUS = typedArray.getDimensionPixelSize(R.styleable.LockPatternView_radius, RADIUS);
+        COUNT = typedArray.getInteger(R.styleable.LockPatternView_number, 9);
+        mPointList = new Point[COUNT];
+        typedArray.recycle();
         initView();
     }
 
@@ -195,7 +199,7 @@ public class LockPatternView extends View {
             } else if (mSelectPoints.size() < MIN_SIZE && mSelectPoints.size() > 0) {
                 //绘制错误
                 errorPoint();
-            }else{
+            } else {
                 //绘制成功
             }
         }
