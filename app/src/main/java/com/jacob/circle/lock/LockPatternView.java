@@ -57,6 +57,7 @@ public class LockPatternView extends View {
 
     private static final int COLOR_NORMAL = Color.parseColor("#7fff9e00");
     private static final int COLOR_ERROR = Color.parseColor("#7ffb6760");
+    private OnLockPatternListener mLockListener;
 
     public LockPatternView(Context context) {
         this(context, null);
@@ -123,7 +124,6 @@ public class LockPatternView extends View {
             initPoint();
             hasInit = true;
         }
-        canvas.drawColor(Color.GRAY);
         //画点
         drawPointOnCanvas(canvas);
 
@@ -161,7 +161,9 @@ public class LockPatternView extends View {
                 if (point != null) {
                     isSelect = true;
                 }
-
+                if (mLockListener != null) {
+                    mLockListener.onLockPatterStart();
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (isSelect) {
@@ -199,8 +201,18 @@ public class LockPatternView extends View {
             } else if (mSelectPoints.size() < MIN_SIZE && mSelectPoints.size() > 0) {
                 //绘制错误
                 errorPoint();
+                if (mLockListener != null) {
+                    mLockListener.onLockPatterError();
+                }
             } else {
                 //绘制成功
+                String pwd = "";
+                for (Point pointS : mSelectPoints) {
+                    pwd = pwd + pointS.index;
+                }
+                if (mLockListener != null && !"".equals(pwd)) {
+                    mLockListener.onLockPatternSuccess(pwd);
+                }
             }
         }
 
@@ -310,5 +322,18 @@ public class LockPatternView extends View {
      */
     private int dpToPx(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+
+    public interface OnLockPatternListener {
+        void onLockPatternSuccess(String pwd);
+
+        void onLockPatterError();
+
+        void onLockPatterStart();
+    }
+
+    public void setOnLockPatternListener(OnLockPatternListener lockPatternListener) {
+        this.mLockListener = lockPatternListener;
     }
 }
